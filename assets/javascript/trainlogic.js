@@ -11,44 +11,43 @@
 
 var database = firebase.database();
 
-// 2. Create button for adding new trains
+// when user submits a new train via user input field
 $("#add-train-btn").on("click", function(event) {
     event.preventDefault();
 
-// 3. Create a way to retrieve entries from the database / grab user input
-var trainName = $("#train-name-input").val().trim();
-var trainDestination = $("#destination-input").val().trim();
-var firstTrain = moment($("#first-train-input").val().trim(), "DD/MM/YY").format("X"); // use moment for first train time 
-var trainFrequency = $("#frequency-input").val().trim();
+    //grab entries from the database 
+    var trainName = $("#train-name-input").val().trim();
+    var trainDestination = $("#destination-input").val().trim();
+    var firstTrain = $("#first-train-input").val().trim();
+    var trainFrequency = $("#frequency-input").val().trim();
 
-//Create local/temporary object for holiding train data 
-var newTrain = {
-    name: trainName,
-    destination: trainDestination,
-    first: firstTrain,
-    frequency: trainFrequency,
-};
+    //Create local/temporary object for holiding train data 
+    var newTrain = {
+        name: trainName,
+        destination: trainDestination,
+        first: firstTrain,
+        frequency: trainFrequency,
+    };
 
-//Push train data to firebase once inputted on local form
-database.ref().push(newTrain);
-console.log(newTrain.name);
-console.log(newTrain.destination);
-console.log(newTrain.first);
-console.log(newTrain.frequency);
+    //Push train data to firebase once inputted on local form
+    database.ref().push(newTrain);
+    console.log(newTrain.name);
+    console.log(newTrain.destination);
+    console.log(newTrain.first);
+    console.log(newTrain.frequency);
 
-// Alert
-alert("Success!");
+    // alert user once a new train is added
+    alert("Success!");
 
-// Clear input fields after submitting to database
+    // Clear input fields after submitting to database
     $("#train-name-input").val("");
     $("#destination-input").val("");
     $("#first-train-input").val("");
     $("#frequency-input").val("");
 });
 
-// 3. Firebase event to add trains to the database and new rown in HTML table
-database.ref().on("child_added", function(childSnapshot, prevChildKey){
-    
+// Firebase event to add trains to the database and new row in HTML table
+database.ref().on("child_added", function(childSnapshot){
     console.log(childSnapshot.val());
 
     //store each value in the variables  
@@ -57,12 +56,25 @@ database.ref().on("child_added", function(childSnapshot, prevChildKey){
     var firstTrain = childSnapshot.val().first;
     var trainFrequency = childSnapshot.val().frequency;
 
-    // 4. Calculate the next arrival using difference between start and current time.// Then use moment.js formatting to set time in hours and minutes
-    var nextTrain = moment().diff(moment.unix(firstTrain, "X"), "minutes");
-    console.log(nextTrain);
+    // calculate the next arrival using difference between start and current time// Then use moment.js formatting to set time in hours and minutes
+    //var currentTime = moment();
+    
+    // capture first train time
+    var firstTransport = moment(firstTrain, "HH:mm");
+    console.log(firstTransport);
+    
+    // find difference from time now and the first train time 
+    var differenceTime = moment().diff(moment(firstTransport), "minutes");
+    
+    // find the remaining time by dividing the difference since first train by the train's frequency 
+    var remainder = differenceTime % trainFrequency;
 
-    // 5. Calculate Minutes Away - reference to the database 
-    var minutesAway = ""; // firstTrain + frequency;
+    // Calculate how many minutes away the train is 
+    var minutesAway = trainFrequency - remainder;
+
+    //add the minutes away and format to new variable, nextTrain
+    var nextTrain = moment().add(minutesAway, "minutes");
+    nextTrain = moment(nextTrain).format("hh:mm A");
 
   // Add each train's data into the table
   $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainFrequency + "</td><td>" + nextTrain + "</td><td>" + minutesAway + "</td></tr>");
