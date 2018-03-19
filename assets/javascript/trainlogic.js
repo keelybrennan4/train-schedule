@@ -37,7 +37,7 @@ $("#add-train-btn").on("click", function(event) {
     console.log(newTrain.frequency);
 
     // alert user once a new train is added
-    alert("Success!");
+    alert("Submission Received!");
 
     // Clear input fields after submitting to database
     $("#train-name-input").val("");
