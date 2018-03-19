@@ -56,34 +56,36 @@ database.ref().on("child_added", function(childSnapshot){
     var firstTrain = childSnapshot.val().first;
     var trainFrequency = childSnapshot.val().frequency;
 
-    // calculate the next arrival using difference between start and current time// Then use moment.js formatting to set time in hours and minutes
-    //var currentTime = moment();
+    var currentTime = moment();
     
     // capture first train time
     var firstTransport = moment(firstTrain, "HH:mm");
     console.log(firstTransport);
     
     // find difference from time now and the first train time 
-    var differenceTime = moment().diff(moment(firstTransport), "minutes");
-    
+    var diffTime = moment().diff(moment(firstTransport), "minutes");
+
     // find the remaining time by dividing the difference since first train by the train's frequency 
-    var remainder = differenceTime % trainFrequency;
+    var remainder = diffTime % trainFrequency;
+    console.log(remainder);
 
     // Calculate how many minutes away the train is 
-    var minutesAway = trainFrequency - remainder;
+    var timeToTrain = trainFrequency - remainder;
+    console.log(timeToTrain);
 
     //add the minutes away and format to new variable, nextTrain
-    var nextTrain = moment().add(minutesAway, "minutes");
-    nextTrain = moment(nextTrain).format("hh:mm A");
+    var nextTrain = moment().add(timeToTrain, "minutes").format("hh:mm A");
+    console.log(nextTrain);
 
-  // Add each train's data into the table
-  $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainFrequency + "</td><td>" + nextTrain + "</td><td>" + minutesAway + "</td></tr>");
+  // add each train's data into the table
+  $("#train-table > tbody").append("<tr><td>" + 
+  trainName + "</td><td>" + 
+  trainDestination + "</td><td>" + 
+  trainFrequency + "</td><td>" + 
+  nextTrain + "</td><td>" + 
+  timeToTrain + "</td></tr>");
 
 });
-
-
-
-
 
 
 
